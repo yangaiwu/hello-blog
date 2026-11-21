@@ -30,19 +30,22 @@ def test_tx_secret_matches_md5_of_key_stream_time():
 
 
 def test_push_url_has_bizid_domain_secret_and_txtime():
-    secret = hashlib.md5(("pushkey123" + "stream1" + TX_TIME).encode()).hexdigest()
-    svc = _service()
+    svc = _service(CSS_PUSH_URL_TTL="3600")
+    expiry = NOW + 3600
+    time_hex = format(expiry, "X")
+    secret = hashlib.md5(("pushkey123" + "stream1" + time_hex).encode()).hexdigest()
     assert svc.build_push_url("stream1", now=NOW) == (
-        f"rtmp://1234.push.example.com/live/stream1?txSecret={secret}&txTime={TX_TIME}"
+        f"rtmp://1234.push.example.com/live/stream1?txSecret={secret}&txTime={time_hex}"
     )
 
 
 def test_obs_config_splits_server_and_stream_key():
-    secret = hashlib.md5(("pushkey123" + "stream1" + TX_TIME).encode()).hexdigest()
-    svc = _service()
+    svc = _service(CSS_PUSH_URL_TTL="3600")
+    time_hex = format(NOW + 3600, "X")
+    secret = hashlib.md5(("pushkey123" + "stream1" + time_hex).encode()).hexdigest()
     obs = svc.build_obs_config("stream1", now=NOW)
     assert obs["server"] == "rtmp://1234.push.example.com/live"
-    assert obs["stream_key"] == f"stream1?txSecret={secret}&txTime={TX_TIME}"
+    assert obs["stream_key"] == f"stream1?txSecret={secret}&txTime={time_hex}"
 
 
 def test_play_urls_use_play_domain_for_hls_and_flv():
