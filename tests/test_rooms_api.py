@@ -141,3 +141,19 @@ def test_create_room_validates_payload_shapes(client, payload):
     resp = client.post("/api/rooms", json=payload)
     assert resp.status_code == 400
     assert "error" in resp.get_json()
+
+def test_live_mode_pages_hide_the_demo_notice(live_client):
+    room_id = _create(live_client).get_json()["room"]["id"]
+    index_html = live_client.get("/").get_data(as_text=True)
+    room_html = live_client.get(f"/room/{room_id}").get_data(as_text=True)
+    assert "演示模式" not in index_html
+    assert 'data-demo="false"' in room_html
+    assert 'data-role="placeholder" hidden' in room_html
+
+
+def test_demo_mode_pages_show_the_demo_notice(client):
+    room_id = _create(client).get_json()["room"]["id"]
+    assert "演示模式" in client.get("/").get_data(as_text=True)
+    room_html = client.get(f"/room/{room_id}").get_data(as_text=True)
+    assert 'data-demo="true"' in room_html
+    assert "演示模式" in room_html
