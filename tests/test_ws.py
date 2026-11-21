@@ -144,3 +144,20 @@ def test_viewer_count_drops_after_disconnect(app, client, live_server):
         assert frame["count"] == 1
     finally:
         _safe_close(stay)
+
+def test_stopping_the_room_notifies_viewers_and_blocks_new_messages(app, client, live_server):
+    room_id = _new_room(client)
+    conn = simple_websocket.Client.connect(_url(live_server, room_id, "Faye"))
+    try:
+        _recv_until(conn, "viewers")
+        client.post(f"/api/rooms/{room_id}/stop")
+        ended = _recv_until(conn, "error")
+        assert ended["code"] == "room_ended"
+
+        time.sleep(1.05)
+        conn.send(json.dumps({"content": "结束后还能发吗"}))
+        follow_up = _recv_until(conn, "error")
+        assert follow_up["code"] == "room_ended"
+        assert client.get(f"/api/rooms/{room_id}/messages").get_json()["messages"] == []
+    finally:
+        _safe_close(conn)
