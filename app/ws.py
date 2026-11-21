@@ -50,6 +50,9 @@ def register(sock, settings, hub) -> None:
                 raw = ws.receive()
                 if raw is None:
                     break
+                if hub.is_closed(room_id):
+                    _error_frame(ws, "room_ended", "直播已结束")
+                    break
                 if len(raw) > MAX_FRAME_LEN:
                     _error_frame(ws, "invalid_payload", "消息过大")
                     continue

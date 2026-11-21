@@ -13,7 +13,17 @@ import threading
 class RoomHub:
     def __init__(self):
         self._rooms: dict[int, list] = {}
+        self._closed: set[int] = set()
         self._lock = threading.Lock()
+
+    def mark_closed(self, room_id: int) -> None:
+        """Flag a room as ended so in-flight connections stop accepting messages."""
+        with self._lock:
+            self._closed.add(room_id)
+
+    def is_closed(self, room_id: int) -> bool:
+        with self._lock:
+            return room_id in self._closed
 
     def join(self, room_id: int, conn) -> int:
         with self._lock:

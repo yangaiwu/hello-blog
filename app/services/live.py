@@ -49,17 +49,19 @@ class LiveService:
         return f"{self.settings.bizid}.{self.settings.play_domain}" if self.settings.bizid else self.settings.play_domain
 
     # --- URLs --------------------------------------------------------------
-    def build_push_url(self, stream: str, now: int | None = None) -> str:
+    def build_push_url(self, stream: str, now: int | None = None, expires: int | None = None) -> str:
         base = f"rtmp://{self._push_host()}/{self.settings.app_name}/{stream}"
         if self.settings.is_demo:
             return base
-        expires = self._expiry(now)
+        expires = self._expiry(now) if expires is None else expires
         return f"{base}?txSecret={self.tx_secret(stream, expires)}&txTime={format(expires, 'X')}"
 
-    def build_obs_config(self, stream: str, now: int | None = None) -> dict:
+    def build_obs_config(
+        self, stream: str, now: int | None = None, expires: int | None = None
+    ) -> dict:
         """OBS wants the server URL and the stream key separately."""
         server = f"rtmp://{self._push_host()}/{self.settings.app_name}"
-        push_url = self.build_push_url(stream, now=now)
+        push_url = self.build_push_url(stream, now=now, expires=expires)
         stream_key = push_url.split("/", 3)[-1].split("/", 1)[-1]
         return {"server": server, "stream_key": stream_key}
 
@@ -75,10 +77,11 @@ class LiveService:
 
     def describe(self, stream: str, now: int | None = None) -> dict:
         """Everything the pages need: push URL, OBS settings, play URLs, demo flag."""
+        expires = None if self.settings.is_demo else self._expiry(now)
         return {
             "demo": self.settings.is_demo,
-            "push_url": self.build_push_url(stream, now=now),
-            "obs": self.build_obs_config(stream, now=now),
+            "push_url": self.build_push_url(stream, now=now, expires=expires),
+            "obs": self.build_obs_config(stream, now=now, expires=expires),
             "play_urls": self.build_play_urls(stream, now=now),
-            "expires_at": None if self.settings.is_demo else self._expiry(now),
+            "expires_at": expires,
         }

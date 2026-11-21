@@ -99,6 +99,12 @@ def api_stop_room(room_id: int):
     room = db.stop_room(_settings().db_path, room_id)
     if room is None:
         return _error("not_found", f"房间 {room_id} 不存在", 404)
+    if room["status"] == "ended":
+        _hub().mark_closed(room_id)
+        _hub().broadcast(
+            room_id,
+            {"type": "error", "code": "room_ended", "message": "直播已结束"},
+        )
     return jsonify({"room": _room_payload(room)})
 
 
