@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}直播间{% endblock %} · 秀场 Live</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('main.index') }}">秀场 <span>Live</span></a>
+    <nav>
+      <a href="{{ url_for('main.index') }}">房间列表</a>
+      <a href="{{ url_for('main.broadcast') }}">我要开播</a>
+    </nav>
+  </header>
+  {% if demo is defined and demo %}
+  <div class="demo-banner">
+    演示模式：未配置腾讯云直播凭据（<code>CSS_PUSH_DOMAIN</code> / <code>CSS_PLAY_DOMAIN</code> / <code>CSS_PUSH_KEY</code>），
+    推流与播放地址为占位值，页面功能可完整体验。
+  </div>
+  {% endif %}
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

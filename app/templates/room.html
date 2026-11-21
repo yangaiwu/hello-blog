@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ room.title }}{% endblock %}
+{% block content %}
+<div id="room"
+     class="room-layout"
+     data-room-id="{{ room.id }}"
+     data-status="{{ room.status }}"
+     data-demo="{{ 'true' if live.demo else 'false' }}"
+     data-hls="{{ live.play_urls.hls }}"
+     data-flv="{{ live.play_urls.flv }}"
+     data-ws-path="/ws/room/{{ room.id }}">
+
+  <section class="stage">
+    <div class="player-wrap">
+      <video id="player" class="player" controls autoplay muted playsinline></video>
+      <div class="player-placeholder" data-role="placeholder" {% if not live.demo %}hidden{% endif %}>
+        <strong>演示模式</strong>
+        <p>未配置腾讯云直播凭据，播放器未拉取真实流。配置 <code>CSS_PUSH_DOMAIN</code> / <code>CSS_PLAY_DOMAIN</code> / <code>CSS_PUSH_KEY</code> 后重启即可联调。</p>
+        <p class="mono">{{ live.play_urls.hls }}</p>
+      </div>
+      <p class="player-error" data-role="player-error" hidden></p>
+    </div>
+    <header class="stage-head">
+      <h1>{{ room.title }}</h1>
+      <p class="meta">
+        <span>主播：{{ room.anchor_name }}</span>
+        {% if room.status == 'running' %}
+          <span class="badge live">直播中</span>
+        {% else %}
+          <span class="badge ended">已结束</span>
+        {% endif %}
+        <span class="viewers" data-role="viewers">在线 0 人</span>
+      </p>
+    </header>
+  </section>
+
+  <aside class="chat">
+    <h2>弹幕</h2>
+    <ol class="messages" data-role="messages">
+      {% for message in messages %}
+      <li><span class="nick">{{ message.nickname }}</span><span class="text">{{ message.content }}</span></li>
+      {% endfor %}
+    </ol>
+    <p class="chat-status" data-role="chat-status">
+      {% if room.status == 'running' %}正在连接…{% else %}直播已结束，无法发送弹幕。{% endif %}
+    </p>
+    <form class="chat-form" data-role="chat-form" {% if room.status != 'running' %}hidden{% endif %}>
+      <input data-role="nickname" maxlength="30" placeholder="昵称" value="游客">
+      <input data-role="content" maxlength="200" placeholder="说点什么…（每秒最多 1 条）" autocomplete="off">
+      <button class="btn primary" type="submit">发送</button>
+    </form>
+    <p class="chat-error" data-role="chat-error" hidden></p>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flv.js@1.6.2/dist/flv.min.js"></script>
+<script src="{{ url_for('static', filename='js/room.js') }}"></script>
+{% endblock %}

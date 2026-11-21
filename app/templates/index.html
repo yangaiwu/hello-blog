@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}房间列表{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>娱乐秀场直播</h1>
+    <p>开播 → 观看 → 弹幕，一条链路跑通。</p>
+  </div>
+  <a class="btn primary" href="{{ url_for('main.broadcast') }}">我要开播</a>
+</section>
+
+{% if rooms %}
+<ul class="room-grid">
+  {% for room in rooms %}
+  <li class="room-card">
+    <a href="{{ room.url }}">
+      <div class="cover">{{ room.title[:1] }}</div>
+      <div class="room-meta">
+        <h2>{{ room.title }}</h2>
+        <p class="anchor">主播：{{ room.anchor_name }}</p>
+        <p class="stats">
+          {% if room.status == 'running' %}
+            <span class="badge live">进行中</span>
+            <span class="viewers" data-room-id="{{ room.id }}">在线 {{ room.viewers }} 人</span>
+          {% else %}
+            <span class="badge ended">已结束</span>
+          {% endif %}
+        </p>
+      </div>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">还没有房间，<a href="{{ url_for('main.broadcast') }}">创建第一个直播间</a>。</p>
+{% endif %}
+{% endblock %}
