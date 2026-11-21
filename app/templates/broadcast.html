@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}开播{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>创建直播间</h1>
+  <p class="hint">填写房间信息后会生成推流地址（OBS 用）与播放地址（观众用）。</p>
+  <form id="create-room" class="form" novalidate>
+    <label>房间标题
+      <input name="title" maxlength="80" placeholder="例如：周五夜聊" required>
+    </label>
+    <label>主播名
+      <input name="anchor_name" maxlength="30" placeholder="例如：小美" required>
+    </label>
+    <button class="btn primary" type="submit">开始直播</button>
+    <p class="form-error" data-role="error" hidden></p>
+  </form>
+</section>
+
+<section id="stream-info" class="panel" hidden>
+  <h2>推流信息 <span class="badge live" data-role="status">进行中</span></h2>
+  <p class="hint">在 OBS 中填入「服务器」与「串流密钥」，点击「开始推流」即可在本页观看。</p>
+  <p class="hint" data-role="demo-hint" hidden>演示模式：以上为占位地址，配置腾讯云 CSS 凭据后重新开播即可获得真实地址。</p>
+  <dl class="kv">
+    <dt>服务器</dt><dd><code data-role="obs-server"></code><button class="btn tiny" data-copy="obs-server">复制</button></dd>
+    <dt>串流密钥</dt><dd><code data-role="obs-key"></code><button class="btn tiny" data-copy="obs-key">复制</button></dd>
+    <dt>RTMP 推流地址</dt><dd><code data-role="push-url"></code><button class="btn tiny" data-copy="push-url">复制</button></dd>
+    <dt>HLS 播放地址</dt><dd><code data-role="hls-url"></code><button class="btn tiny" data-copy="hls-url">复制</button></dd>
+    <dt>FLV 播放地址</dt><dd><code data-role="flv-url"></code><button class="btn tiny" data-copy="flv-url">复制</button></dd>
+  </dl>
+  <div class="actions">
+    <a class="btn" data-role="watch-link" href="#">进入观看页</a>
+    <button class="btn danger" data-role="stop">结束直播</button>
+  </div>
+</section>
+
+<ul id="recent" class="plain-list" hidden></ul>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/broadcast.js') }}"></script>
+{% endblock %}
